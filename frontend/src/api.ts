@@ -25,20 +25,18 @@ function wrap<Req, Res>(schema: RouteSchema) {
   const params = [...schema.route.target.matchAll(/:([^/]+)/g)].map((m) => m[1]);
 
   return async (req: Req): Promise<Res> => {
-    const reqRecord = req as Record<string, string>;
-    const body = { ...reqRecord };
+    const body = schema.req.parse(req) as Record<string, unknown>;
     let target = schema.route.target;
 
     for (const param of params) {
+      target = target.replace(`:${param}`, `${body[param]}`);
       delete body[param];
-      target = target.replace(`:${param}`, reqRecord[param]);
     }
 
     const isGet = schema.route.method === "GET";
 
     if (isGet) {
       const sp = new URLSearchParams();
-
       Object.entries(body).forEach(([k, v]) => {
         sp.set(k, `${v}`);
       });
@@ -56,17 +54,15 @@ function wrap<Req, Res>(schema: RouteSchema) {
     };
 
     console.log("->", fullReq.method, target, fullReq);
-
     const res = await fetch(target, fullReq);
+
     if (!res.ok) {
       throw new Error(`Failed: ${res.statusText}`);
     }
 
-    const resBody = await res.json();
-    const parsedBody = schema.res.parse(resBody) as Res;
-
-    console.log("<-", fullReq.method, target, parsedBody);
-
-    return parsedBody;
+    const json = await res.json();
+    const resParsed = schema.res.parse(json) as Res;
+    console.log("<-", fullReq.method, target, resParsed);
+    return resParsed;
   };
 }
