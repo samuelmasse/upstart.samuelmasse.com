@@ -64,18 +64,18 @@ function App() {
     <main>
       <h1>Upstart</h1>
 
-      <h2>Create Item</h2>
+      <h2>Create Todo</h2>
       <form onSubmit={handleSubmit}>
         <label>Title</label>
         <input type="text" value={title} onChange={(e) => setTitle(e.target.value)} />
         <label>Description</label>
         <textarea value={description} onChange={(e) => setDescription(e.target.value)} />
         <button type="submit" disabled={loading}>
-          Create Item
+          Create
         </button>
       </form>
 
-      <h2>Items ({items.length})</h2>
+      <h2>Todos ({items.length})</h2>
       <table>
         <thead>
           <tr>
