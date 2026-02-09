@@ -9,11 +9,11 @@ import type { ItemsStore } from "../store/itemsStore";
 const IdSchema = z.object({ id: z.string().min(1) });
 
 export async function itemsRoutes(app: FastifyInstance, store: ItemsStore) {
-  app.get("/items", async () => {
+  app.get("/api/items", async () => {
     return { items: store.list() };
   });
 
-  app.get("/items/:id", async (req, reply) => {
+  app.get("/api/items/:id", async (req, reply) => {
     const { id } = IdSchema.parse(req.params);
     const item = store.get(id);
 
@@ -24,13 +24,13 @@ export async function itemsRoutes(app: FastifyInstance, store: ItemsStore) {
     return item;
   });
 
-  app.post("/items", async (req, reply) => {
+  app.post("/api/items", async (req, reply) => {
     const data = ItemCreateSchema.parse(req.body);
     const item = store.create(data);
     return reply.code(201).send(item);
   });
 
-  app.patch("/items/:id", async (req, reply) => {
+  app.patch("/api/items/:id", async (req, reply) => {
     const { id } = IdSchema.parse(req.params);
     const patch = ItemUpdateSchema.parse(req.body);
 
@@ -43,7 +43,7 @@ export async function itemsRoutes(app: FastifyInstance, store: ItemsStore) {
     return item;
   });
 
-  app.delete("/items/:id", async (req, reply) => {
+  app.delete("/api/items/:id", async (req, reply) => {
     const { id } = IdSchema.parse(req.params);
     const ok = store.remove(id);
 
