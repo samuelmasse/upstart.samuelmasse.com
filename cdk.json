@@ -1,0 +1,4 @@
+{
+  "app": "pnpm exec tsx src/index.ts",
+  "requireApproval": "never"
+}

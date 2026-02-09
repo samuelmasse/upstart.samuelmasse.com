@@ -1,0 +1,22 @@
+@base = http://localhost:3000
+
+### Create
+POST {{base}}/items
+Content-Type: application/json
+
+{
+  "title": "Buy milk",
+  "description": "2%"
+}
+
+### List
+GET {{base}}/items
+
+### Update
+@id = REPLACE_ME
+PATCH {{base}}/items/{{id}}
+Content-Type: application/json
+
+{
+  "done": true
+}

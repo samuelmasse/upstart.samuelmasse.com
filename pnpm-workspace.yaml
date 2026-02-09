@@ -1,0 +1,9 @@
+packages:
+  - common
+  - frontend
+  - backend
+  - .
+
+ignoredBuiltDependencies:
+  - esbuild
+  - unrs-resolver
