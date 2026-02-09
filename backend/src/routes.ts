@@ -1,26 +1,12 @@
-import { Schema } from "@upstart.samuelmasse.com/common";
+import { RouteSchema } from "@upstart.samuelmasse.com/common";
 import { FastifyInstance } from "fastify";
 import z from "zod";
-import { TodoApi } from "./todo-api";
-import { TodoDb } from "./todo-db";
 import { Req, Res } from "./types";
 
-export class App {
-  constructor(private app: FastifyInstance) {
-    const todoDb = new TodoDb();
-    const todoApi = new TodoApi(todoDb);
+export class Routes {
+  constructor(private app: FastifyInstance) {}
 
-    this.register(Schema.createTodo, todoApi.createTodo.bind(todoApi));
-    this.register(Schema.getTodo, todoApi.getTodo.bind(todoApi));
-    this.register(Schema.listTodos, todoApi.listTodos.bind(todoApi));
-    this.register(Schema.deleteTodo, todoApi.deleteTodo.bind(todoApi));
-    this.register(Schema.putTodo, todoApi.putTodo.bind(todoApi));
-  }
-
-  private register = (
-    schema: { route: { method: string; target: string }; req: z.ZodObject; res: z.ZodObject },
-    handler: (req: Req<any>) => Promise<Res<any>>,
-  ) => {
+  public add<ReqBody, ResBody>(schema: RouteSchema, handler: (req: Req<ReqBody>) => Promise<Res<ResBody>>) {
     this.app.route({
       method: schema.route.method,
       url: schema.route.target,
@@ -29,8 +15,12 @@ export class App {
           console.log();
           console.log(schema.route.method, schema.route.target);
 
-          console.log(req.query);
-          const body: any = { ...req.body, ...req.params, ...req.query };
+          const body: Record<string, unknown> = {
+            ...((req.body as Record<string, unknown>) || {}),
+            ...((req.params as Record<string, unknown>) || {}),
+            ...((req.query as Record<string, unknown>) || {}),
+          };
+
           console.log("body", body);
 
           const validBody = schema.req.safeParse(body);
@@ -43,7 +33,7 @@ export class App {
 
           console.log("req", validBody.data);
 
-          const res = await handler({ body: validBody.data });
+          const res = await handler({ body: validBody.data as ReqBody });
           console.log("res", res);
 
           const validRes = schema.res.parse(res.body);
@@ -56,5 +46,5 @@ export class App {
         }
       },
     });
-  };
+  }
 }

@@ -25,12 +25,13 @@ function wrap<Req, Res>(schema: RouteSchema) {
   const params = [...schema.route.target.matchAll(/:([^/]+)/g)].map((m) => m[1]);
 
   return async (req: Req): Promise<Res> => {
-    const body: any = { ...req };
+    const reqRecord = req as Record<string, string>;
+    const body = { ...reqRecord };
     let target = schema.route.target;
 
     for (const param of params) {
       delete body[param];
-      target = target.replace(`:${param}`, (req as any)[param]);
+      target = target.replace(`:${param}`, reqRecord[param]);
     }
 
     const isGet = schema.route.method === "GET";
