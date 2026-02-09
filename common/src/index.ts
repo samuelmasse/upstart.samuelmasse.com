@@ -33,7 +33,7 @@ export const Schema = {
   },
   listTodos: {
     route: route("GET", "/todos"),
-    req: z.object({ page: z.coerce.number(), rank: z.coerce.number() }),
+    req: z.object({}),
     res: z.object({ items: z.array(TodoItemSchema) }),
   },
   deleteTodo: {

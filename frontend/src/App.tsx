@@ -10,7 +10,7 @@ function App() {
 
   const fetchItems = async () => {
     try {
-      const data = await api.listTodos({ page: 343, rank: 334 });
+      const data = await api.listTodos({});
       setItems(data.items);
     } catch (err) {
       console.error("Failed to fetch items:", err);

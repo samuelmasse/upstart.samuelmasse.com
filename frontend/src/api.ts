@@ -49,18 +49,24 @@ function wrap<Req, Res>(schema: RouteSchema) {
       }
     }
 
-    console.log(target);
-
-    const res = await fetch(target, {
+    const fullReq = {
       method: schema.route.method,
       headers: { "Content-Type": "application/json", Authorization: `${localStorage.getItem("fakeUser")}` },
-      body: isGet ? undefined : JSON.stringify(req),
-    });
+      body: isGet ? undefined : JSON.stringify(body),
+    };
 
+    console.log("->", fullReq.method, target, fullReq);
+
+    const res = await fetch(target, fullReq);
     if (!res.ok) {
       throw new Error(`Failed: ${res.statusText}`);
     }
 
-    return res.json();
+    const resBody = await res.json();
+    const parsedBody = schema.res.parse(resBody) as Res;
+
+    console.log("<-", fullReq.method, target, parsedBody);
+
+    return parsedBody;
   };
 }
