@@ -1,16 +1,16 @@
-import type { Item, ItemCreate } from "@upstart.samuelmasse.com/common";
+import { CreateTodoRequest, TodoItem } from "@upstart.samuelmasse.com/common";
 import { useState, useEffect } from "react";
+import { api } from "./api";
 
 function App() {
-  const [items, setItems] = useState<Item[]>([]);
+  const [items, setItems] = useState<TodoItem[]>([]);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [loading, setLoading] = useState(false);
 
   const fetchItems = async () => {
     try {
-      const res = await fetch("/api/items");
-      const data = await res.json();
+      const data = await api.listTodos({ page: 343, rank: 334 });
       setItems(data.items);
     } catch (err) {
       console.error("Failed to fetch items:", err);
@@ -26,22 +26,15 @@ function App() {
     setLoading(true);
 
     try {
-      const newItem: ItemCreate = {
+      const newItem: CreateTodoRequest = {
         title,
         description: description || undefined,
       };
 
-      const res = await fetch("/api/items", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(newItem),
-      });
-
-      if (res.ok) {
-        setTitle("");
-        setDescription("");
-        await fetchItems();
-      }
+      await api.createTodo(newItem);
+      setTitle("");
+      setDescription("");
+      await fetchItems();
     } catch (err) {
       console.error("Failed to create item:", err);
     } finally {
@@ -49,13 +42,9 @@ function App() {
     }
   };
 
-  const toggleDone = async (item: Item) => {
+  const toggleDone = async (item: TodoItem) => {
     try {
-      await fetch(`/api/items/${item.id}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ done: !item.done }),
-      });
+      await api.putTodo({ id: item.id, item: { done: !item.done } });
       await fetchItems();
     } catch (err) {
       console.error("Failed to update item:", err);
@@ -64,9 +53,7 @@ function App() {
 
   const deleteItem = async (id: string) => {
     try {
-      await fetch(`/api/items/${id}`, {
-        method: "DELETE",
-      });
+      await api.deleteTodo({ id });
       await fetchItems();
     } catch (err) {
       console.error("Failed to delete item:", err);
@@ -80,16 +67,9 @@ function App() {
       <h2>Create Item</h2>
       <form onSubmit={handleSubmit}>
         <label>Title</label>
-        <input
-          type="text"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-        />
+        <input type="text" value={title} onChange={(e) => setTitle(e.target.value)} />
         <label>Description</label>
-        <textarea
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-        />
+        <textarea value={description} onChange={(e) => setDescription(e.target.value)} />
         <button type="submit" disabled={loading}>
           Create Item
         </button>
@@ -111,11 +91,7 @@ function App() {
             .map((item) => (
               <tr key={item.id}>
                 <td>
-                  <input
-                    type="checkbox"
-                    checked={item.done}
-                    onChange={() => toggleDone(item)}
-                  />
+                  <input type="checkbox" checked={item.done} onChange={() => toggleDone(item)} />
                 </td>
                 <td>
                   <strong>{item.title}</strong>

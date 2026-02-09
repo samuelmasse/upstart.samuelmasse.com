@@ -1,7 +1,7 @@
-@base = http://localhost:3000
+@base = http://localhost:3000/api/v1
 
-### Create
-POST {{base}}/items
+### createTodo
+POST {{base}}/todos
 Content-Type: application/json
 
 {
@@ -9,14 +9,20 @@ Content-Type: application/json
   "description": "2%"
 }
 
-### List
-GET {{base}}/items
+### getTodos
+@id = <id>
+GET {{base}}/todos/{{id}}
 
-### Update
-@id = REPLACE_ME
-PATCH {{base}}/items/{{id}}
+### listTodos
+GET {{base}}/todos?rank=232&page=43
+
+### putTodo
+@id = <id>
+PUT {{base}}/todos/{{id}}
 Content-Type: application/json
 
 {
-  "done": true
+  "item": {
+    "done": true
+  }
 }
