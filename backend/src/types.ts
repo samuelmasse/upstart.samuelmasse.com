@@ -1,4 +1,5 @@
 export type Req<T> = {
+  userId: string;
   body: T;
 };
 

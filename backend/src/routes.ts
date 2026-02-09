@@ -33,7 +33,12 @@ export class Routes {
 
           console.log("req", validBody.data);
 
-          const res = await handler({ body: validBody.data as ReqBody });
+          const userId = req.headers.authorization;
+          if (!userId?.length) {
+            return reply.code(403).send();
+          }
+
+          const res = await handler({ userId, body: validBody.data as ReqBody });
           console.log("res", res);
 
           const validRes = schema.res.parse(res.body);

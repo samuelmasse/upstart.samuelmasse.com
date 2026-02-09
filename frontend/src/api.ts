@@ -53,7 +53,7 @@ function wrap<Req, Res>(schema: RouteSchema) {
 
     const res = await fetch(target, {
       method: schema.route.method,
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", Authorization: `${localStorage.getItem("fakeUser")}` },
       body: isGet ? undefined : JSON.stringify(req),
     });
 

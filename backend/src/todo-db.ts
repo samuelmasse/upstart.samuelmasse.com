@@ -1,22 +1,38 @@
 import { randomUUID } from "node:crypto";
+import { DynamoDBDocument } from "@aws-sdk/lib-dynamodb";
 import { TodoItem } from "@upstart.samuelmasse.com/common";
 
 export class TodoDb {
-  private readonly items = new Map<string, TodoItem>();
+  private readonly tableName = "UpstartTodos";
 
-  list(): TodoItem[] {
-    return [...this.items.values()].sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1));
+  constructor(private ddb: DynamoDBDocument) {}
+
+  async list(userId: string): Promise<TodoItem[]> {
+    const result = await this.ddb.query({
+      TableName: this.tableName,
+      KeyConditionExpression: "userId = :userId",
+      ExpressionAttributeValues: { ":userId": userId },
+    });
+
+    const items = (result.Items || []) as TodoItem[];
+    return items.sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1));
   }
 
-  get(id: string): TodoItem | undefined {
-    return this.items.get(id);
+  async get(userId: string, todoId: string): Promise<TodoItem | undefined> {
+    const result = await this.ddb.get({
+      TableName: this.tableName,
+      Key: { userId, todoId },
+    });
+
+    return result.Item as TodoItem | undefined;
   }
 
-  create(data: { title: string; description?: string }): TodoItem {
+  async create(data: { userId: string; title: string; description?: string }): Promise<TodoItem> {
     const now = new Date().toISOString();
 
     const item: TodoItem = {
-      id: randomUUID(),
+      userId: data.userId,
+      todoId: randomUUID(),
       title: data.title,
       description: data.description,
       done: false,
@@ -24,13 +40,19 @@ export class TodoDb {
       updatedAt: now,
     };
 
-    this.items.set(item.id, item);
+    await this.ddb.put({
+      TableName: this.tableName,
+      Item: item,
+    });
+
     return item;
   }
 
-  update(id: string, patch: Partial<TodoItem>): TodoItem | undefined {
-    const cur = this.items.get(id);
-    if (!cur) return undefined;
+  async update(userId: string, todoId: string, patch: Partial<TodoItem>): Promise<TodoItem | undefined> {
+    const cur = await this.get(userId, todoId);
+    if (!cur) {
+      return undefined;
+    }
 
     const next: TodoItem = {
       ...cur,
@@ -38,11 +60,25 @@ export class TodoDb {
       updatedAt: new Date().toISOString(),
     };
 
-    this.items.set(id, next);
+    await this.ddb.put({
+      TableName: this.tableName,
+      Item: next,
+    });
+
     return next;
   }
 
-  remove(id: string): boolean {
-    return this.items.delete(id);
+  async remove(userId: string, todoId: string): Promise<boolean> {
+    const item = await this.get(userId, todoId);
+    if (!item) {
+      return false;
+    }
+
+    await this.ddb.delete({
+      TableName: this.tableName,
+      Key: { userId, todoId },
+    });
+
+    return true;
   }
 }

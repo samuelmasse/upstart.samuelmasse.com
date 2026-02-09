@@ -17,7 +17,8 @@ export class TodoApi {
   constructor(private todoDb: TodoDb) {}
 
   public async createTodo(req: Req<CreateTodoRequest>): Promise<Res<CreateTodoResponse>> {
-    const item = this.todoDb.create({
+    const item = await this.todoDb.create({
+      userId: req.userId,
       title: req.body.title,
       description: req.body.description,
     });
@@ -26,25 +27,25 @@ export class TodoApi {
   }
 
   public async getTodo(req: Req<GetTodoRequest>): Promise<Res<GetTodoResponse>> {
-    const item = this.todoDb.get(req.body.id);
+    const item = await this.todoDb.get(req.userId, req.body.id);
 
     return { body: { item } };
   }
 
   public async listTodos(req: Req<ListTodosRequest>): Promise<Res<ListTodosResponse>> {
-    const items = this.todoDb.list();
+    const items = await this.todoDb.list(req.userId);
 
     return { body: { items } };
   }
 
   public async deleteTodo(req: Req<DeleteTodoRequest>): Promise<Res<DeleteTodoResponse>> {
-    const deleted = this.todoDb.remove(req.body.id);
+    const deleted = await this.todoDb.remove(req.userId, req.body.id);
 
     return { body: { deleted } };
   }
 
   public async putTodo(req: Req<PutTodoRequest>): Promise<Res<PutTodoResponse>> {
-    const item = this.todoDb.update(req.body.id, req.body.item);
+    const item = await this.todoDb.update(req.userId, req.body.id, req.body.item);
 
     return { body: { item } };
   }

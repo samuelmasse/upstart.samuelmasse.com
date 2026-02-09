@@ -8,7 +8,8 @@ function route(method: string, sub: string) {
 }
 
 export const TodoItemSchema = z.object({
-  id: z.string(),
+  userId: z.string(),
+  todoId: z.string(),
   title: z.string(),
   description: z.string().optional(),
   done: z.boolean(),

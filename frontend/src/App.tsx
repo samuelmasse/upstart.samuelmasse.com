@@ -44,7 +44,7 @@ function App() {
 
   const toggleDone = async (item: TodoItem) => {
     try {
-      await api.putTodo({ id: item.id, item: { done: !item.done } });
+      await api.putTodo({ id: item.todoId, item: { done: !item.done } });
       await fetchItems();
     } catch (err) {
       console.error("Failed to update item:", err);
@@ -89,7 +89,7 @@ function App() {
           {[...items]
             .sort((a, b) => (a.done > b.done ? 1 : -1))
             .map((item) => (
-              <tr key={item.id}>
+              <tr key={item.todoId}>
                 <td>
                   <input type="checkbox" checked={item.done} onChange={() => toggleDone(item)} />
                 </td>
@@ -98,7 +98,7 @@ function App() {
                 </td>
                 <td>{item.description}</td>
                 <td>
-                  <button onClick={() => deleteItem(item.id)}>Delete</button>
+                  <button onClick={() => deleteItem(item.todoId)}>Delete</button>
                 </td>
               </tr>
             ))}

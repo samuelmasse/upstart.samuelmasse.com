@@ -1,8 +1,10 @@
 @base = http://localhost:3000/api/v1
+@userId = sam
 
 ### createTodo
 POST {{base}}/todos
 Content-Type: application/json
+Authorization: {{userId}}
 
 {
   "title": "Buy milk",
@@ -12,14 +14,17 @@ Content-Type: application/json
 ### getTodos
 @id = <id>
 GET {{base}}/todos/{{id}}
+Authorization: {{userId}}
 
 ### listTodos
 GET {{base}}/todos?rank=232&page=43
+Authorization: {{userId}}
 
 ### putTodo
 @id = <id>
 PUT {{base}}/todos/{{id}}
 Content-Type: application/json
+Authorization: {{userId}}
 
 {
   "item": {
